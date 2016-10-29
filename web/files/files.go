@@ -96,7 +96,6 @@ func createDirectoryHandler(c *gin.Context, vfsC *vfs.Context) (doc *vfs.DirDoc,
 		c.Query("Name"),
 		c.Param("folder-id"),
 		strings.Split(c.Query("Tags"), TagSeparator),
-		nil,
 	)
 	if err != nil {
 		return

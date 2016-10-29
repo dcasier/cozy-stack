@@ -35,9 +35,8 @@ type DirDoc struct {
 	Fullpath string   `json:"path"`
 	Tags     []string `json:"tags"`
 
-	parent *DirDoc
-	files  []*FileDoc
-	dirs   []*DirDoc
+	files []*FileDoc
+	dirs  []*DirDoc
 }
 
 // ID returns the directory qualified identifier - see couchdb.Doc interface
@@ -68,30 +67,28 @@ func (d *DirDoc) SetRev(rev string) {
 	d.ObjRev = rev
 }
 
-// Path is used to generate the file path
-func (d *DirDoc) Path(c *Context) (string, error) {
-	if d.Fullpath == "" {
-		parent, err := d.Parent(c)
-		if err != nil {
-			return "", err
-		}
-		parentPath, err := parent.Path(c)
-		if err != nil {
-			return "", err
-		}
-		d.Fullpath = path.Join(parentPath, d.Name)
+func (d *DirDoc) calcPath(c *Context) error {
+	if d.Fullpath != "" {
+		return nil
 	}
-	return d.Fullpath, nil
+	parent, err := getParentDir(c, d.FolderID)
+	if err != nil {
+		return err
+	}
+	parentPath, err := parent.Path(c)
+	if err != nil {
+		return err
+	}
+	d.Fullpath = path.Join(parentPath, d.Name)
+	return nil
 }
 
-// Parent returns the parent directory document
-func (d *DirDoc) Parent(c *Context) (*DirDoc, error) {
-	parent, err := getParentDir(c, d.parent, d.FolderID)
-	if err != nil {
-		return nil, err
+// Path is used to generate the file path
+func (d *DirDoc) Path(c *Context) (string, error) {
+	if err := d.calcPath(c); err != nil {
+		return "", err
 	}
-	d.parent = parent
-	return parent, nil
+	return d.Fullpath, nil
 }
 
 // SelfLink is used to generate a JSON-API link for the directory (part of
@@ -156,12 +153,12 @@ func (d *DirDoc) Included() []jsonapi.Object {
 //
 // @TODO: add pagination control
 func (d *DirDoc) FetchFiles(c *Context) (err error) {
-	d.files, d.dirs, err = fetchChildren(c, d)
+	d.files, d.dirs, err = c.cache.DirFiles(d)
 	return err
 }
 
 // NewDirDoc is the DirDoc constructor. The given name is validated.
-func NewDirDoc(name, folderID string, tags []string, parent *DirDoc) (doc *DirDoc, err error) {
+func NewDirDoc(name, folderID string, tags []string) (doc *DirDoc, err error) {
 	if err = checkFileName(name); err != nil {
 		return
 	}
@@ -181,8 +178,6 @@ func NewDirDoc(name, folderID string, tags []string, parent *DirDoc) (doc *DirDo
 		CreatedAt: createDate,
 		UpdatedAt: createDate,
 		Tags:      tags,
-
-		parent: parent,
 	}
 
 	return
@@ -191,16 +186,9 @@ func NewDirDoc(name, folderID string, tags []string, parent *DirDoc) (doc *DirDo
 // GetDirDoc is used to fetch directory document information
 // form the database.
 func GetDirDoc(c *Context, fileID string, withChildren bool) (*DirDoc, error) {
-	doc := &DirDoc{}
-	err := couchdb.GetDoc(c.db, FsDocType, fileID, doc)
-	if couchdb.IsNotFoundError(err) {
-		err = ErrParentDoesNotExist
-	}
+	doc, err := c.cache.DirByID(fileID)
 	if err != nil {
 		return nil, err
-	}
-	if doc.Type != DirType {
-		return nil, os.ErrNotExist
 	}
 	if withChildren {
 		err = doc.FetchFiles(c)
@@ -211,21 +199,10 @@ func GetDirDoc(c *Context, fileID string, withChildren bool) (*DirDoc, error) {
 // GetDirDocFromPath is used to fetch directory document information from
 // the database from its path.
 func GetDirDocFromPath(c *Context, pth string, withChildren bool) (*DirDoc, error) {
-	var doc *DirDoc
-	var err error
-
-	var docs []*DirDoc
-	sel := mango.Equal("path", path.Clean(pth))
-	req := &couchdb.FindRequest{Selector: sel, Limit: 1}
-	err = couchdb.FindDocs(c.db, FsDocType, req, &docs)
+	doc, err := c.cache.DirByPath(pth)
 	if err != nil {
 		return nil, err
 	}
-	if len(docs) == 0 {
-		return nil, os.ErrNotExist
-	}
-	doc = docs[0]
-
 	if withChildren {
 		err = doc.FetchFiles(c)
 	}
@@ -250,7 +227,7 @@ func CreateDirectory(c *Context, doc *DirDoc) (err error) {
 		}
 	}()
 
-	return couchdb.CreateDoc(c.db, doc)
+	return c.cache.CreateDir(doc)
 }
 
 // CreateRootDirectory creates the root folder for this context
@@ -289,16 +266,9 @@ func ModifyDirMetadata(c *Context, olddoc *DirDoc, patch *DocPatch) (newdoc *Dir
 		return
 	}
 
-	newdoc, err = NewDirDoc(*patch.Name, *patch.FolderID, *patch.Tags, nil)
+	newdoc, err = NewDirDoc(*patch.Name, *patch.FolderID, *patch.Tags)
 	if err != nil {
 		return
-	}
-
-	var parent *DirDoc
-	if newdoc.FolderID != olddoc.FolderID {
-		parent, err = newdoc.Parent(c)
-	} else {
-		parent = olddoc.parent
 	}
 
 	if err != nil {
@@ -309,7 +279,6 @@ func ModifyDirMetadata(c *Context, olddoc *DirDoc, patch *DocPatch) (newdoc *Dir
 	newdoc.SetRev(olddoc.Rev())
 	newdoc.CreatedAt = cdate
 	newdoc.UpdatedAt = *patch.UpdatedAt
-	newdoc.parent = parent
 	newdoc.files = olddoc.files
 	newdoc.dirs = olddoc.dirs
 
@@ -327,18 +296,22 @@ func ModifyDirMetadata(c *Context, olddoc *DirDoc, patch *DocPatch) (newdoc *Dir
 		if err != nil {
 			return
 		}
-		err = bulkUpdateDocsPath(c, oldpath, newpath)
+	}
+
+	err = c.cache.UpdateDir(newdoc)
+
+	if oldpath != newpath {
+		err = bulkUpdateDocsPath(c, oldpath, newdoc.ID())
 		if err != nil {
 			return
 		}
 	}
 
-	err = couchdb.UpdateDoc(c.db, newdoc)
 	return
 }
 
 // @TODO remove this method and use couchdb bulk updates instead
-func bulkUpdateDocsPath(c *Context, oldpath, newpath string) error {
+func bulkUpdateDocsPath(c *Context, oldpath, newFolderID string) error {
 	var children []*DirDoc
 	sel := mango.StartWith("path", oldpath+"/")
 	req := &couchdb.FindRequest{Selector: sel}
@@ -350,12 +323,23 @@ func bulkUpdateDocsPath(c *Context, oldpath, newpath string) error {
 	errc := make(chan error)
 
 	for _, child := range children {
-		go func(child *DirDoc) {
-			if !strings.HasPrefix(child.Fullpath, oldpath+"/") {
+		go func(oldchild *DirDoc) {
+			if !strings.HasPrefix(oldchild.Fullpath, oldpath+"/") {
 				errc <- fmt.Errorf("Child has wrong base directory")
+				return
+			}
+
+			newchild, errg := NewDirDoc(
+				oldchild.Name,
+				newFolderID,
+				oldchild.Tags,
+			)
+			if errg != nil {
+				errc <- errg
 			} else {
-				child.Fullpath = path.Join(newpath, child.Fullpath[len(oldpath)+1:])
-				errc <- couchdb.UpdateDoc(c.db, child)
+				newchild.SetID(oldchild.ID())
+				newchild.SetRev(oldchild.Rev())
+				errc <- c.cache.UpdateDir(newchild)
 			}
 		}(child)
 	}
@@ -367,30 +351,6 @@ func bulkUpdateDocsPath(c *Context, oldpath, newpath string) error {
 	}
 
 	return err
-}
-
-func fetchChildren(c *Context, parent *DirDoc) (files []*FileDoc, dirs []*DirDoc, err error) {
-	var docs []*dirOrFile
-	sel := mango.Equal("folder_id", parent.ID())
-	req := &couchdb.FindRequest{Selector: sel, Limit: 10}
-	err = couchdb.FindDocs(c.db, FsDocType, req, &docs)
-	if err != nil {
-		return
-	}
-
-	for _, doc := range docs {
-		typ, dir, file := doc.refine()
-		switch typ {
-		case FileType:
-			file.parent = parent
-			files = append(files, file)
-		case DirType:
-			dir.parent = parent
-			dirs = append(dirs, dir)
-		}
-	}
-
-	return
 }
 
 func safeRenameDirectory(c *Context, oldpath, newpath string) error {

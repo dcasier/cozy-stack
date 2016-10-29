@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cozy/cozy-stack/couchdb"
 	"github.com/spf13/afero"
 )
 
@@ -30,9 +29,9 @@ const FsDocType = "io.cozy.files"
 
 const (
 	// DirType is the type attribute for directories
-	DirType = "directory"
+	DirType = `directory`
 	// FileType is the type attribute for files
-	FileType = "file"
+	FileType = `file`
 )
 
 // DocPatch is a struct containing modifiable fields from file and
@@ -86,13 +85,10 @@ func (fd *dirOrFile) refine() (typ string, dir *DirDoc, file *FileDoc) {
 // GetDirOrFileDoc is used to fetch a document from its identifier
 // without knowing in advance its type.
 func GetDirOrFileDoc(c *Context, fileID string, withChildren bool) (typ string, dirDoc *DirDoc, fileDoc *FileDoc, err error) {
-	dirOrFile := &dirOrFile{}
-	err = couchdb.GetDoc(c.db, FsDocType, fileID, dirOrFile)
+	typ, dirDoc, fileDoc, err = c.cache.DirOrFileByID(fileID)
 	if err != nil {
 		return
 	}
-
-	typ, dirDoc, fileDoc = dirOrFile.refine()
 	if typ == DirType && withChildren {
 		dirDoc.FetchFiles(c)
 	}
@@ -126,13 +122,18 @@ func GetDirOrFileDocFromPath(c *Context, pth string, withChildren bool) (typ str
 // Context is used to convey the afero.Fs object along with the
 // CouchDb database prefix.
 type Context struct {
-	fs afero.Fs
-	db string
+	fs    afero.Fs
+	db    string
+	cache Cache
 }
 
 // NewContext is the constructor function for Context
-func NewContext(fs afero.Fs, dbprefix string) *Context {
-	return &Context{fs, dbprefix}
+func NewContext(fs afero.Fs, db string) *Context {
+	c := new(Context)
+	c.fs = fs
+	c.db = db
+	c.cache = NewLocalCache(c, 50)
+	return c
 }
 
 // Stat returns the FileInfo of the specified file or directory.
@@ -188,7 +189,7 @@ func (c *Context) Mkdir(pth string) error {
 		return err
 	}
 
-	dir, err := NewDirDoc(dirname, parent.ID(), nil, nil)
+	dir, err := NewDirDoc(dirname, parent.ID(), nil)
 	if err != nil {
 		return err
 	}
@@ -220,7 +221,7 @@ func (c *Context) MkdirAll(pth string) error {
 	}
 
 	for i := len(dirs) - 1; i >= 0; i-- {
-		parent, err = NewDirDoc(dirs[i], parent.ID(), nil, parent)
+		parent, err = NewDirDoc(dirs[i], parent.ID(), nil)
 		if err == nil {
 			err = CreateDirectory(c, parent)
 		}
@@ -295,14 +296,9 @@ func ExtractMimeAndClass(contentType string) (mime, class string) {
 	return
 }
 
-// getParentDir returns the parent directory document if nil.
-func getParentDir(c *Context, parent *DirDoc, folderID string) (*DirDoc, error) {
-	if parent != nil {
-		return parent, nil
-	}
-	var err error
-	parent, err = GetDirDoc(c, folderID, false)
-	return parent, err
+// getParentDir returns the parent directory document.
+func getParentDir(c *Context, folderID string) (parent *DirDoc, err error) {
+	return GetDirDoc(c, folderID, false)
 }
 
 func normalizeDocPatch(data, patch *DocPatch, cdate time.Time) (*DocPatch, error) {
