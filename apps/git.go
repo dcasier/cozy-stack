@@ -14,9 +14,9 @@ import (
 
 	"github.com/dcasier/cozy-stack/vfs"
 	"github.com/spf13/afero"
-	git "gopkg.in/src-d/go-git.v4.0.0-rc1"
-	gitSt "gopkg.in/src-d/go-git.v4.0.0-rc1/storage/filesystem"
-	gitFS "gopkg.in/src-d/go-git.v4.0.0-rc1/utils/fs"
+	git "gopkg.in/src-d/go-git.v4"
+	gitSt "gopkg.in/src-d/go-git.v4/storage/filesystem"
+	gitFS "gopkg.in/src-d/go-git.v4/utils/fs"
 )
 
 const manifestFilename = "manifest.webapp"
