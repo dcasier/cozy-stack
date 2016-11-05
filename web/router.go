@@ -23,12 +23,12 @@
 package web
 
 import (
-	"github.com/cozy/cozy-stack/web/apps"
-	"github.com/cozy/cozy-stack/web/data"
-	"github.com/cozy/cozy-stack/web/files"
-	"github.com/cozy/cozy-stack/web/middlewares"
-	"github.com/cozy/cozy-stack/web/status"
-	"github.com/cozy/cozy-stack/web/version"
+	"github.com/dcasier/cozy-stack/web/apps"
+	"github.com/dcasier/cozy-stack/web/data"
+	"github.com/dcasier/cozy-stack/web/files"
+	"github.com/dcasier/cozy-stack/web/middlewares"
+	"github.com/dcasier/cozy-stack/web/status"
+	"github.com/dcasier/cozy-stack/web/version"
 	"github.com/gin-gonic/gin"
 )
 

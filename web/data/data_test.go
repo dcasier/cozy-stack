@@ -11,9 +11,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cozy/cozy-stack/couchdb"
-	"github.com/cozy/cozy-stack/instance"
-	"github.com/cozy/cozy-stack/web/middlewares"
+	"github.com/dcasier/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/instance"
+	"github.com/dcasier/cozy-stack/web/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/sourcegraph/checkup"
 	"github.com/stretchr/testify/assert"

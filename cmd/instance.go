@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/cozy/cozy-stack/instance"
+	"github.com/dcasier/cozy-stack/instance"
 	"github.com/spf13/cobra"
 )
 

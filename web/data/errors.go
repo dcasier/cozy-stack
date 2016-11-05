@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cozy/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb"
 )
 
 // HTTPStatus gives the http status for given error

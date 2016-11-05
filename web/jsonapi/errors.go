@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cozy/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb"
 )
 
 // SourceError contains references to the source of the error

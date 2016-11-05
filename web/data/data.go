@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cozy/cozy-stack/couchdb"
-	"github.com/cozy/cozy-stack/web/middlewares"
+	"github.com/dcasier/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/web/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

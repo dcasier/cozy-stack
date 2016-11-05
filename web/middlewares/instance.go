@@ -3,8 +3,8 @@
 package middlewares
 
 import (
-	"github.com/cozy/cozy-stack/instance"
-	"github.com/cozy/cozy-stack/web/jsonapi"
+	"github.com/dcasier/cozy-stack/instance"
+	"github.com/dcasier/cozy-stack/web/jsonapi"
 	"github.com/gin-gonic/gin"
 )
 

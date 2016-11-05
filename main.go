@@ -25,7 +25,7 @@ package main
 import (
 	"os"
 
-	"github.com/cozy/cozy-stack/cmd"
+	"github.com/dcasier/cozy-stack/cmd"
 )
 
 func main() {

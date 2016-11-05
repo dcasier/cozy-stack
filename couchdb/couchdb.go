@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cozy/cozy-stack/couchdb/mango"
+	"github.com/dcasier/cozy-stack/couchdb/mango"
 )
 
 // Doc is the interface that encapsulate a couchdb document, of any

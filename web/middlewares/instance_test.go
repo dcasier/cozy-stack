@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cozy/cozy-stack/instance"
+	"github.com/dcasier/cozy-stack/instance"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

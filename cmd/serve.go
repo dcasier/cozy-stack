@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
-	"github.com/cozy/cozy-stack/config"
-	"github.com/cozy/cozy-stack/web"
+	"github.com/dcasier/cozy-stack/config"
+	"github.com/dcasier/cozy-stack/web"
 )
 
 // serveCmd represents the serve command

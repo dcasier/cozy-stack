@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cozy/cozy-stack/couchdb"
-	"github.com/cozy/cozy-stack/couchdb/mango"
-	"github.com/cozy/cozy-stack/vfs"
+	"github.com/dcasier/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb/mango"
+	"github.com/dcasier/cozy-stack/vfs"
 	"github.com/sourcegraph/checkup"
 	"github.com/stretchr/testify/assert"
 )

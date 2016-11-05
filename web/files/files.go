@@ -13,10 +13,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cozy/cozy-stack/couchdb"
-	"github.com/cozy/cozy-stack/vfs"
-	"github.com/cozy/cozy-stack/web/jsonapi"
-	"github.com/cozy/cozy-stack/web/middlewares"
+	"github.com/dcasier/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/vfs"
+	"github.com/dcasier/cozy-stack/web/jsonapi"
+	"github.com/dcasier/cozy-stack/web/middlewares"
 	"github.com/gin-gonic/gin"
 )
 

@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/cozy/cozy-stack/config"
+	"github.com/dcasier/cozy-stack/config"
 	"github.com/spf13/cobra"
 	"strconv"
 )

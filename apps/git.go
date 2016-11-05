@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cozy/cozy-stack/vfs"
+	"github.com/dcasier/cozy-stack/vfs"
 	"github.com/spf13/afero"
 	git "gopkg.in/src-d/go-git.v4"
 	gitSt "gopkg.in/src-d/go-git.v4/storage/filesystem"

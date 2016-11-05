@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cozy/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb"
 	"github.com/spf13/afero"
 )
 

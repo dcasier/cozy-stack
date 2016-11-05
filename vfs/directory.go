@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cozy/cozy-stack/couchdb"
-	"github.com/cozy/cozy-stack/couchdb/mango"
-	"github.com/cozy/cozy-stack/web/jsonapi"
+	"github.com/dcasier/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb/mango"
+	"github.com/dcasier/cozy-stack/web/jsonapi"
 )
 
 // DirDoc is a struct containing all the informations about a

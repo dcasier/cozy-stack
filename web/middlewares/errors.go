@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/cozy/cozy-stack/couchdb"
+	"github.com/dcasier/cozy-stack/couchdb"
 	"github.com/gin-gonic/gin"
 )
 

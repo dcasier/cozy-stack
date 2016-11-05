@@ -8,7 +8,7 @@ import (
 )
 
 // Build is the git commit used at compilation
-// go build -ldflags "-X github.com/cozy/cozy-stack/web/version.Build=<sha1>"
+// go build -ldflags "-X github.com/dcasier/cozy-stack/web/version.Build=<sha1>"
 var Build = "Unknown"
 
 // Version responds with the git commit used at the build
