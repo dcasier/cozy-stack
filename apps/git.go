@@ -289,7 +289,7 @@ func (fs *gfs) Open(filename string) (gitFS.File, error) {
 
 func (fs *gfs) OpenFile (filename string, flag int, perm os.FileMode) (gitFS.File, error) {
         fullpath := fs.Join(fs.base, filename)
-        f, err := fs.vfsC.OpenFile(fullpath, flag int, perm os.FileMode)
+        f, err := fs.vfsC.OpenFile(fullpath, flag, perm)
         if err != nil {
                 return nil, err
         }
