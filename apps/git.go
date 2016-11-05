@@ -287,6 +287,15 @@ func (fs *gfs) Open(filename string) (gitFS.File, error) {
 	return newGFileRead(f, fullpath[len(fs.base)+1:]), nil
 }
 
+func (fs *gfs) OpenFile (filename string, flag int, perm os.FileMode) (gitFS.File, error) {
+        fullpath := fs.Join(fs.base, filename)
+        f, err := fs.vfsC.Open(fullpath)
+        if err != nil {
+                return nil, err
+        }
+        return newGFileRead(f, fullpath[len(fs.base)+1:]), nil
+}
+
 func (fs *gfs) Stat(filename string) (gitFS.FileInfo, error) {
 	return fs.vfsC.Stat(fs.Join(fs.base, filename))
 }
