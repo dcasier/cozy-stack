@@ -7,8 +7,8 @@ import (
 	"net/url"
 
 	"github.com/dcasier/cozy-stack/apps"
-	"github.com/cozy/cozy-stack/web/jsonapi"
-	"github.com/cozy/cozy-stack/web/middlewares"
+	"github.com/dcasier/cozy-stack/web/jsonapi"
+	"github.com/dcasier/cozy-stack/web/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
