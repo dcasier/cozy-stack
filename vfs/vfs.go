@@ -146,6 +146,10 @@ func (c *Context) Open(name string) (afero.File, error) {
 	return c.fs.Open(name)
 }
 
+func (c *Context) OpenFile (name string, flag int, perm os.FileMode) (afero.File, error) {
+        return c.fs.OpenFile(name, flag, perm)
+}
+
 // ReadDir returns a list of FileInfo of all the direct children of
 // the specified directory.
 func (c *Context) ReadDir(name string) ([]os.FileInfo, error) {
