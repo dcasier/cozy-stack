@@ -296,11 +296,11 @@ func (fs *gfs) OpenFile (filename string, flag int, perm os.FileMode) (gitFS.Fil
         return newGFileRead(f, fullpath[len(fs.base)+1:]), nil
 }
 
-func (fs *gfs) Remove (filename string) (gitFS.File, error) {
+func (fs *gfs) Remove (filename string) (error) {
 	fullpath := fs.Join(fs.base, filename)
         err := fs.vfsC.Remove(fullpath)
         if err != nil {
-                return nil, err
+                return err
         }
 }
 

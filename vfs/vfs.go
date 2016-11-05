@@ -150,7 +150,7 @@ func (c *Context) OpenFile (name string, flag int, perm os.FileMode) (afero.File
         return c.fs.OpenFile(name, flag, perm)
 }
 
-func (c *Context) Remove (name string) (afero.File, error) {
+func (c *Context) Remove (name string) (error) {
         return c.fs.Remove(name)
 }
 
